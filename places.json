@@ -1,0 +1,16 @@
+[
+    {
+        "title": "Athens",
+        "description": "This is Athens. It's the capital of Greece.", 
+        "latitude": 37.98, 
+        "longitude": 23.72, 
+        "visit here": "https://www.google.com/search?q=athens+greece"
+    }, 
+    {
+        "title": "Not Athens",
+        "description": "This is not Athens. It's not the capital of Greece.", 
+        "latitude": 45.98, 
+        "longitude": 22.72,  
+        "visit here": "https://www.google.com/search?q=not+athens+greece"
+    }
+]
