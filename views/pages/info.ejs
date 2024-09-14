@@ -3,6 +3,114 @@
 
 <head>
   <% include ../partials/head %>
+
+  <style>
+    /* Carousel container */
+    .carousel-container {
+        position: relative;
+        width: 80%;
+        margin: 0 auto;
+        overflow: hidden;
+    }
+
+    /* Carousel items */
+    .carousel-slide {
+        display: flex;
+        transition: transform 0.5s ease-in-out;
+        width: 100%;
+    }
+
+    /* Individual card for each place */
+    .carousel-item {
+        min-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Carousel controls (previous and next buttons) */
+    .prev, .next {
+        cursor: pointer;
+        position: absolute;
+        top: 50%;
+        width: auto;
+        padding: 10px;
+        transform: translateY(-50%);
+        color: white;
+        background-color: rgba(0, 0, 0, 0.5);
+        border: none;
+        font-size: 18px;
+        user-select: none;
+    }
+
+    .prev {
+        left: 0;
+    }
+
+    .next {
+        right: 0;
+    }
+
+    /* Indicator dots */
+    .carousel-dots {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .dot {
+        height: 15px;
+        width: 15px;
+        margin: 0 5px;
+        background-color: #bbb;
+        border-radius: 50%;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    .active-dot {
+        background-color: #717171;
+    }
+
+    /* Simple styling for cards */
+    .card {
+        background: #f9f9f9;
+        padding: 20px;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    .card img {
+        width: 100%;
+        height: auto;
+    }
+
+    .card h5 {
+        margin: 15px 0 10px;
+    }
+
+    .card p {
+        color: #666;
+    }
+
+    .card a {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+
+    .card a:hover {
+        background-color: #0056b3;
+    }
+
+    /* Fixed image size in the carousel */
+    .card img {
+      width: 796px;  /* Set fixed width */
+      height: 450px; /* Set fixed height */
+      object-fit: cover; /* Maintain aspect ratio, crop if necessary */
+    }
+  </style>
 </head>
 
 <body class="container">
@@ -12,7 +120,32 @@
   </header>
 
   <main>
-    <div id="map"></div>
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="well">
+          <div class="container mt-5">
+    
+            <!-- Carousel structure -->
+            <div class="carousel-container">
+                <div class="carousel-slide">
+                    <!-- Items will be injected here by scripts.ejs -->
+                </div>
+    
+                <!-- Next and previous buttons -->
+                <button class="prev">&lt;</button>
+                <button class="next">&gt;</button>
+            </div>
+    
+            <!-- Dots for indicators -->
+            <div class="carousel-dots">
+                <!-- Dots will be injected here by scripts.ejs -->
+            </div>
+        </div>
+
+      </div>
+
+
+    </div>
   </main>
 
   <footer>

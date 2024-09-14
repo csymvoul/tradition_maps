@@ -27,3 +27,61 @@
                 console.error('Failed to load places:', err);
             });
 </script>
+<script>
+    // Fetch places.json data
+    fetch('/places')
+        .then(response => response.json())
+        .then(places => {
+            const carouselSlide = document.querySelector('.carousel-slide');
+            const carouselDots = document.querySelector('.carousel-dots');
+            let currentIndex = 0;
+
+            // Dynamically create carousel items and dots
+            places.forEach((place, index) => {
+                // Create carousel item (card)
+                const carouselItem = document.createElement('div');
+                carouselItem.classList.add('carousel-item');
+                carouselItem.innerHTML = `
+                    <div class="card">
+                        <img src="${place.image}" alt="${place.title}">
+                        <h5>${place.title}</h5>
+                        <p>${place.description}</p>
+                        <a href="${place['visit here']}" target="_blank">Visit Here</a>
+                    </div>
+                `;
+                carouselSlide.appendChild(carouselItem);
+
+                // Create dot for each item
+                const dot = document.createElement('span');
+                dot.classList.add('dot');
+                if (index === 0) dot.classList.add('active-dot');
+                dot.addEventListener('click', () => moveToSlide(index));
+                carouselDots.appendChild(dot);
+            });
+
+            const totalItems = places.length;
+            const dots = document.querySelectorAll('.dot');
+
+            // Function to move to the next or previous slide
+            function moveToSlide(index) {
+                if (index >= totalItems) currentIndex = 0;
+                else if (index < 0) currentIndex = totalItems - 1;
+                else currentIndex = index;
+
+                // Move the slide
+                carouselSlide.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+                // Update active dot
+                dots.forEach(dot => dot.classList.remove('active-dot'));
+                dots[currentIndex].classList.add('active-dot');
+            }
+
+            // Previous and Next button functionality
+            document.querySelector('.prev').addEventListener('click', () => moveToSlide(currentIndex - 1));
+            document.querySelector('.next').addEventListener('click', () => moveToSlide(currentIndex + 1));
+
+        })
+        .catch(error => {
+            console.error('Error fetching places:', error);
+        });
+</script>

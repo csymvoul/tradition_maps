@@ -22,10 +22,20 @@ app.get('/about', function(req, res) {
 	res.render('pages/about');
 });
 
-// info page
-app.get('/info', function(req, res) {
-	res.render('pages/info');
+
+app.get('/info', (req, res) => {
+    fs.readFile(path.join(__dirname, 'places.json'), 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: 'Failed to load places' });
+        }
+        const places = JSON.parse(data);
+        res.render('pages/info', { places }); // Pass the places data to info.ejs
+    });
 });
+// // info page
+// app.get('/info', function(req, res) {
+// 	res.render('pages/info');
+// });
 
 // Endpoint to send places.json
 app.get('/places', (req, res) => {
