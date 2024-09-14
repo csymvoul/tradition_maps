@@ -19,7 +19,7 @@
                     marker.bindPopup(`
                         <strong>${place.title}</strong><br>
                         ${place.description}<br>
-                        <a href="${place['visit here']}" target="_blank">Visit here</a>
+                        <a href="${place['visitHere']}" target="_blank">Περισσότερες πληροφορίες</a>
                     `);
                 });
             })
@@ -45,7 +45,7 @@
                     <div class="card">
                         <img src="${place.image}" alt="${place.title}">
                         <h4>${place.title}</h4>
-                        <p>${place.description}</p>
+                        <p>${place.detailedDescription}</p>
                         <a href="${place['visitHere']}" target="_blank">Περισσότερες Πληροφορίες</a>
                     </div>
                 `;
