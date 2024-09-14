@@ -7,4 +7,23 @@
   	maxZoom: 19,
   	attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   }).addTo(map);
+
+  fetch('/places')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(place => {
+                    // Create a marker for each place
+                    const marker = L.marker([place.latitude, place.longitude]).addTo(map);
+
+                    // Bind a popup to each marker with the place information
+                    marker.bindPopup(`
+                        <strong>${place.title}</strong><br>
+                        ${place.description}<br>
+                        <a href="${place['visit here']}" target="_blank">Visit here</a>
+                    `);
+                });
+            })
+            .catch(err => {
+                console.error('Failed to load places:', err);
+            });
 </script>

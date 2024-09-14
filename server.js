@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+const fs = require('fs');
+const path = require('path');
 
 // module dependencies
 var express = require('express');
@@ -23,6 +25,16 @@ app.get('/about', function(req, res) {
 // info page
 app.get('/info', function(req, res) {
 	res.render('pages/info');
+});
+
+// Endpoint to send places.json
+app.get('/places', (req, res) => {
+    fs.readFile(path.join(__dirname, 'places.json'), 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: 'Failed to load places' });
+        }
+        res.json(JSON.parse(data));
+    });
 });
 
 // Get port from environment and store in Express
