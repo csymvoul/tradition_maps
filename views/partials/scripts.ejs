@@ -18,8 +18,12 @@
                     // Bind a popup to each marker with the place information
                     marker.bindPopup(`
                         <strong>${place.title}</strong><br>
-                        ${place.description}<br>
-                        <a href="${place['visitHere']}" target="_blank">Περισσότερες πληροφορίες</a>
+                        ${place.description}<br><br>
+                        <b>Περισσότερες πληροφορίες:</b><br>
+                        <ul>
+                        <li><a href="${place['youtube']}" target="_blank">YouTube</a></li>
+                        <li><a href="${place['google']}" target="_blank">Google</a></li>
+                        </ul>
                     `);
                 });
             })
@@ -47,7 +51,7 @@
                         <img src="${place.image}" alt="${place.title}">
                         <h4>${place.title}</h4>
                         <p>${place.detailedDescription}</p>
-                        <a href="${place['visitHere']}" target="_blank">Περισσότερες Πληροφορίες</a>
+                        <a href="${place['google']}" target="_blank">Περισσότερες Πληροφορίες</a>
                     </div>
                 `;
                 carouselSlide.appendChild(carouselItem);
