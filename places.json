@@ -7,6 +7,7 @@
         "longitude": 23.72, 
         "google": "https://www.google.com/search?q=athens+greece", 
         "youtube": "https://www.youtube.com/",
+        "visitgreece": "https://www.visitgreece.gr/en/mainland/athens",
         "image": "https://www.visitgreece.gr/images/1743x752/jpg/files/s_1852670350_athens_1743x752.jpg"
     }, 
     {
@@ -17,6 +18,7 @@
         "longitude": 22.62,  
         "google": "https://www.google.com/search?q=platamonas",
         "youtube": "https://www.youtube.com/",
+        "visitgreece": "https://www.visitgreece.gr/en/mainland/platamonas",
         "image":"https://media-cdn.tripadvisor.com/media/photo-c/1280x250/05/c2/9d/47/platamonas-castle.jpg"
     }, 
     {
@@ -27,6 +29,7 @@
         "longitude": 22.37,  
         "google": "https://www.google.com/search?q=tripoli-greece",
         "youtube": "https://www.youtube.com/",
+        "visitgreece": "https://www.visitgreece.gr/en/mainland/tripoli",
         "image": "https://www.visitgreece.gr/images/1743x752/jpg/files/s_1855879771_tripoli_1743x752.webp"
     }
 ]

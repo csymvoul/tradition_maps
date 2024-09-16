@@ -23,6 +23,7 @@
                         <ul>
                             <li><a href="${place['youtube']}" target="_blank">YouTube</a></li>
                             <li><a href="${place['google']}" target="_blank">Google</a></li>
+                            <li><a hred="${place['visitgreece']}" target="_blank">Visit Greece</a></li>
                         </ul>
                     `);
                 });
@@ -51,14 +52,17 @@
                         <img src="${place.image}" alt="${place.title}">
                         <h4>${place.title}</h4>
                         <p>${place.detailedDescription}</p>
-                        <a href="${place['google']}" target="_blank">Περισσότερες Πληροφορίες</a> 
+                        <a href="${place['google']}" target="_blank"style="background-color: #007BFF; font-weight:bold">Google</a> 
                         
                         <!-- Button with youtube logo
                         <a href="${place['youtube']}" target="_blank" style="border-radius: 5px; padding: 9px 10px; background-color: #AC0000 ; display: inline-block">
                             <img src="" alt="YouTube" style="height: 40px; width: auto;">
                         </a> -->
 
-                        <a href="${place['youtube']}" target="_blank" style="background-color: red; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">YouTube</a>
+                        <a href="${place['youtube']}" target="_blank" style="background-color: red; font-weight:bold">YouTube</a> 
+
+
+                        <a href="${place['visitgreece']}" target="_blank" style="background-color: #33fff9; font-weight:bold; color: black">Visit Greece</a>
 
                     </div>
                 `;
