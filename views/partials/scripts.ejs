@@ -2,36 +2,86 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script> -->
 <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
 <script>
-    var map = L.map('map').setView([38.25, 23.97], 6);
-    var OpenStreetMap_Mapnik = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 8,
-    minZoom: 5,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    let map = L.map('map').setView([37.59, 22.04], 8);
+    let OpenStreetMap_Mapnik = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        minZoom: 6,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
 
-    fetch('/places')
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(place => {
-                    // Create a marker for each place
-                    const marker = L.marker([place.latitude, place.longitude]).addTo(map);
+    let allPlaces = [];  // Store all places globally
+    let markers = [];     // Store markers for filtering
+    let uniqueCategories = new Set();  // Store unique categories dynamically
 
-                    // Bind a popup to each marker with the place information
-                    marker.bindPopup(`
-                        <strong>${place.title}</strong><br>
-                        ${place.description}<br><br>
-                        <b>Σχετικά link:</b><br>
-                        <ul>
-                            <li><a href="${place['youtube']}" target="_blank"> YouTube </a></li>
-                            <li><a href="${place['google']}" target="_blank"> Google </a></li>
-                            <li><a href="${place['visitgreece']}" target="_blank"> Visit Greece </a></li>
-                        </ul>
-                    `);
-                });
-            })
-            .catch(err => {
-                console.error('Failed to load places:', err);
-            });
+    // Fetch places
+    fetch('/places')
+        .then(response => response.json())
+        .then(data => {
+            allPlaces = data;
+
+            // Extract unique categories
+            data.forEach(place => uniqueCategories.add(place.category));
+
+            // Generate filter checkboxes dynamically
+            createFilterUI();
+
+            // Initially display all markers
+            updateMap();
+        })
+        .catch(err => console.error('Failed to load places:', err));
+
+    // Function to create filter checkboxes dynamically
+    function createFilterUI() {
+        const filterContainer = document.getElementById('filters');
+        filterContainer.innerHTML = ""; // Clear any existing filters
+
+        uniqueCategories.forEach(category => {
+            const label = document.createElement('label');
+            label.innerHTML = `
+                <input type="checkbox" class="filter" value="${category}" checked> ${capitalize(category)}
+            `;
+            filterContainer.appendChild(label);
+        });
+
+        // Attach event listeners to the checkboxes
+        document.querySelectorAll('.filter').forEach(input => {
+            input.addEventListener('change', updateMap);
+        });
+    } 
+
+    // Function to update map based on selected filters
+    function updateMap() {
+        // Remove existing markers
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+
+        // Get selected filters
+        let selectedFilters = Array.from(document.querySelectorAll('.filter:checked'))
+                                .map(input => input.value);
+
+        // Add markers for filtered places
+        allPlaces.forEach(place => {
+            if (selectedFilters.includes(place.category)) {
+                let marker = L.marker([place.latitude, place.longitude]).addTo(map);
+                marker.bindPopup(`
+                    <strong>${place.title}</strong><br>
+                    ${place.description}<br><br>
+                    <b>Σχετικά link:</b><br>
+                    <ul>
+                        <li><a href="${place['youtube']}" target="_blank"> YouTube </a></li>
+                        <li><a href="${place['google']}" target="_blank"> Google </a></li>
+                        <li><a href="${place['visitgreece']}" target="_blank"> Visit Greece </a></li>
+                    </ul>
+                `);
+                markers.push(marker);
+            }
+        });
+    }
+
+    // Helper function to capitalize first letter of category names
+    function capitalize(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
 </script>
 <script>
     // Fetch places.json data

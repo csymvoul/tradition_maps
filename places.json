@@ -8,7 +8,8 @@
         "google": "https://www.google.com/search?q=athens+greece", 
         "youtube": "https://www.youtube.com/watch?v=m-ZUQGwt7yo",
         "visitgreece": "https://www.visitgreece.gr/en/mainland/athens",
-        "image": "https://kritesneasionias.gr/wp-content/uploads/2017/05/instruments.jpg"
+        "image": "https://kritesneasionias.gr/wp-content/uploads/2017/05/instruments.jpg", 
+        "category": "place"
     }, 
     {
         "title": "Κυκλάδες",
@@ -19,7 +20,8 @@
         "google": "https://www.google.com/search?q=kyklades",
         "youtube": "https://www.youtube.com/watch?v=WtExNiTIrlA",
         "visitgreece": "https://www.visitgreece.gr/en/mainland/platamonas",
-        "image":"https://foresies-paradosi.gr/wp-content/uploads/2017/05/kythnos-andriki-paradosiaki-foresia-kyklades-638x961.jpg"
+        "image":"https://foresies-paradosi.gr/wp-content/uploads/2017/05/kythnos-andriki-paradosiaki-foresia-kyklades-638x961.jpg", 
+        "category": "place"
     }, 
     {
         "title": "Επτάνησα",
@@ -30,7 +32,8 @@
         "google": "https://www.google.com/search?q=eptanisa-greece",
         "youtube": "https://www.youtube.com/watch?v=2xm4U4vx-DI",
         "visitgreece": "https://www.visitgreece.gr/en/mainland/tripoli",
-        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Neapolitan_mandolin_001.jpg/184px-Neapolitan_mandolin_001.jpg"
+        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Neapolitan_mandolin_001.jpg/184px-Neapolitan_mandolin_001.jpg", 
+        "category": "other"
     }, 
     {
         "title": "Πελοπόννησος",
@@ -41,7 +44,8 @@
         "google": "https://www.google.com/search?q=peloponnisos-greece",
         "youtube": "https://www.youtube.com/watch?v=v8wkQqYXJtA",
         "visitgreece": "https://www.visitgreece.gr/en/mainland/tripoli",
-        "image": "https://www.kalimera-arkadia.gr/media/k2/items/cache/74224e85c5bab006cf267e4b805f8772_XL.jpg"
+        "image": "https://www.kalimera-arkadia.gr/media/k2/items/cache/74224e85c5bab006cf267e4b805f8772_XL.jpg", 
+        "category": "other"
     }, 
     {
         "title": "Ήπειρος",
@@ -52,7 +56,8 @@
         "google": "https://www.google.com/search?q=epirus-greece",
         "youtube": "https://www.youtube.com/watch?v=oWRoD8XR6A8",
         "visitgreece": "https://www.visitgreece.gr/en/mainland/tripoli",
-        "image": "https://olanea.gr/wp-content/uploads/2023/06/ipeiros230608.jpg"
+        "image": "https://olanea.gr/wp-content/uploads/2023/06/ipeiros230608.jpg", 
+        "category": "other"
     }, 
     {
         "title": "Μακεδονία",
@@ -63,6 +68,7 @@
         "google": "https://www.google.com/search?q=epirus-greece",
         "youtube": "https://www.youtube.com/watch?v=T5sC5aXRfTA",
         "visitgreece": "https://www.visitgreece.gr/en/mainland/tripoli",
-        "image": "https://olanea.gr/wp-content/uploads/2023/06/ipeiros230608.jpg"
+        "image": "https://olanea.gr/wp-content/uploads/2023/06/ipeiros230608.jpg", 
+        "category": "other"
     }
 ]
