@@ -9,10 +9,13 @@ const Tradition = sequelize.define('Tradition', {
     type: DataTypes.ENUM('festival', 'museum', 'church', 'music', 'dance', 'food', 'custom'),
     defaultValue: 'custom'
   },
-  image:        { type: DataTypes.TEXT },
-  youtube:      { type: DataTypes.TEXT },
-  google:       { type: DataTypes.TEXT },
-  visitgreece:  { type: DataTypes.TEXT }
+  // Primary image (kept for backward compat / list views)
+  image:       { type: DataTypes.TEXT },
+  // Gallery — array of image URLs stored as JSONB
+  images:      { type: DataTypes.JSONB, defaultValue: [] },
+  youtube:     { type: DataTypes.TEXT },
+  google:      { type: DataTypes.TEXT },
+  visitgreece: { type: DataTypes.TEXT }
 }, {
   tableName: 'traditions',
   timestamps: false

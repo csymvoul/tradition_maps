@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getPlaces, createPlace, deletePlace } from '../api';
 import PlaceForm from '../components/PlaceForm';
+import ConfirmButton from '../components/ConfirmButton';
 
 export default function Places({ token }) {
   const [places, setPlaces] = useState([]);
@@ -12,38 +13,24 @@ export default function Places({ token }) {
 
   async function load() {
     setLoading(true);
-    try {
-      setPlaces(await getPlaces());
-    } finally {
-      setLoading(false);
-    }
+    try { setPlaces(await getPlaces()); } finally { setLoading(false); }
   }
 
   useEffect(() => { load(); }, []);
 
   async function handleCreate(data) {
     setSaving(true);
-    try {
-      await createPlace(token, data);
-      setShowForm(false);
-      await load();
-    } finally {
-      setSaving(false);
-    }
+    try { await createPlace(token, data); setShowForm(false); await load(); }
+    finally { setSaving(false); }
   }
 
-  async function handleDelete(id, name) {
-    if (!window.confirm(`Διαγραφή του μέρους "${name}"; Αυτό θα διαγράψει και όλες τις παραδόσεις του.`)) return;  // eslint-disable-line no-restricted-globals
-    try {
-      await deletePlace(token, id);
-      setPlaces(ps => ps.filter(p => p.id !== id));
-    } catch (err) {
-      setError(err.message);
-    }
+  async function handleDelete(id) {
+    try { await deletePlace(token, id); setPlaces(ps => ps.filter(p => p.id !== id)); }
+    catch (err) { setError(err.message); }
   }
 
   if (loading) return (
-    <div className="d-flex align-items-center justify-content-center" style={{ height: '60vh' }}>
+    <div className="d-flex align-items-center justify-content-center" style={{ height:'60vh' }}>
       <div className="spinner-border text-dark" />
     </div>
   );
@@ -68,7 +55,7 @@ export default function Places({ token }) {
 
       {places.length === 0 ? (
         <div className="text-center text-muted py-5">
-          <i className="bi bi-geo-alt" style={{ fontSize: '3rem' }}></i>
+          <i className="bi bi-geo-alt" style={{ fontSize:'3rem' }}></i>
           <p className="mt-2">Δεν υπάρχουν μέρη. Προσθέστε το πρώτο!</p>
         </div>
       ) : (
@@ -80,28 +67,33 @@ export default function Places({ token }) {
                 <th>Περιοχή</th>
                 <th>Παραδόσεις</th>
                 <th>Συντεταγμένες</th>
-                <th style={{ width: '120px' }}></th>
+                <th style={{ width: '160px' }}></th>
               </tr>
             </thead>
             <tbody>
               {places.map(p => (
-                <tr key={p._id}>
+                <tr key={p.id}>
                   <td className="fw-semibold">{p.name}</td>
                   <td className="text-muted">{p.region || '—'}</td>
-                  <td>
-                    <span className="badge bg-secondary">{(p.traditions || []).length}</span>
-                  </td>
-                  <td className="text-muted" style={{ fontSize: '0.82rem' }}>
+                  <td><span className="badge bg-secondary">{(p.traditions||[]).length}</span></td>
+                  <td className="text-muted" style={{ fontSize:'0.82rem' }}>
                     {p.latitude?.toFixed(3)}, {p.longitude?.toFixed(3)}
                   </td>
                   <td>
-                    <div className="d-flex gap-1">
+                    <div className="d-flex gap-1 align-items-center">
                       <Link to={`/places/${p.id}`} className="btn btn-sm btn-outline-dark">
                         <i className="bi bi-pencil"></i>
                       </Link>
-                      <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(p.id, p.name)}>
+                      <a href={`/place/${p.id}`} target="_blank" rel="noreferrer"
+                        className="btn btn-sm btn-outline-secondary" title="Προεπισκόπηση">
+                        <i className="bi bi-eye"></i>
+                      </a>
+                      <ConfirmButton
+                        onConfirm={() => handleDelete(p.id)}
+                        message="Διαγραφή;"
+                      >
                         <i className="bi bi-trash"></i>
-                      </button>
+                      </ConfirmButton>
                     </div>
                   </td>
                 </tr>

@@ -1,17 +1,51 @@
 const express = require('express');
 const router = express.Router();
+const { Op } = require('sequelize');
+const { body, validationResult } = require('express-validator');
 const Place = require('../models/Place');
 const Tradition = require('../models/Tradition');
 const requireAuth = require('../middleware/auth');
 
 const withTraditions = { include: [{ model: Tradition, as: 'traditions' }] };
 
+// ── Validation rules ───────────────────────────────────────────────────────────
+
+const placeRules = [
+  body('name').trim().notEmpty().withMessage('Το όνομα είναι υποχρεωτικό'),
+  body('latitude').isFloat({ min: -90,  max: 90  }).withMessage('Μη έγκυρο γεωγραφικό πλάτος'),
+  body('longitude').isFloat({ min: -180, max: 180 }).withMessage('Μη έγκυρο γεωγραφικό μήκος')
+];
+
+const traditionRules = [
+  body('name').trim().notEmpty().withMessage('Το όνομα παράδοσης είναι υποχρεωτικό'),
+  body('category').optional()
+    .isIn(['festival','museum','church','music','dance','food','custom'])
+    .withMessage('Μη έγκυρη κατηγορία'),
+  body('youtube').optional({ checkFalsy: true }).isURL().withMessage('Μη έγκυρο YouTube URL'),
+  body('google').optional({ checkFalsy: true }).isURL().withMessage('Μη έγκυρο Google URL'),
+  body('visitgreece').optional({ checkFalsy: true }).isURL().withMessage('Μη έγκυρο Visit Greece URL')
+];
+
+function validate(req, res, next) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
+  next();
+}
+
 // ── Public routes ──────────────────────────────────────────────────────────────
 
-// GET /api/places
+// GET /api/places?search=query
 router.get('/', async (req, res) => {
   try {
-    const places = await Place.findAll(withTraditions);
+    const { search } = req.query;
+    const options = { ...withTraditions };
+
+    if (search) {
+      const like = { [Op.iLike]: `%${search}%` };
+      options.where = { [Op.or]: [{ name: like }, { region: like }] };
+    }
+
+    const places = await Place.findAll(options);
     res.json(places);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch places' });
@@ -29,10 +63,10 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// ── Admin routes (JWT required) ────────────────────────────────────────────────
+// ── Admin routes (JWT + validation) ───────────────────────────────────────────
 
 // POST /api/places
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requireAuth, placeRules, validate, async (req, res) => {
   try {
     const place = await Place.create(req.body);
     res.status(201).json(await Place.findByPk(place.id, withTraditions));
@@ -42,7 +76,7 @@ router.post('/', requireAuth, async (req, res) => {
 });
 
 // PUT /api/places/:id
-router.put('/:id', requireAuth, async (req, res) => {
+router.put('/:id', requireAuth, placeRules, validate, async (req, res) => {
   try {
     const place = await Place.findByPk(req.params.id);
     if (!place) return res.status(404).json({ error: 'Place not found' });
@@ -65,7 +99,7 @@ router.delete('/:id', requireAuth, async (req, res) => {
 });
 
 // POST /api/places/:id/traditions
-router.post('/:id/traditions', requireAuth, async (req, res) => {
+router.post('/:id/traditions', requireAuth, traditionRules, validate, async (req, res) => {
   try {
     const place = await Place.findByPk(req.params.id);
     if (!place) return res.status(404).json({ error: 'Place not found' });
@@ -77,7 +111,7 @@ router.post('/:id/traditions', requireAuth, async (req, res) => {
 });
 
 // PUT /api/places/:id/traditions/:tid
-router.put('/:id/traditions/:tid', requireAuth, async (req, res) => {
+router.put('/:id/traditions/:tid', requireAuth, traditionRules, validate, async (req, res) => {
   try {
     const tradition = await Tradition.findOne({
       where: { id: req.params.tid, placeId: req.params.id }
