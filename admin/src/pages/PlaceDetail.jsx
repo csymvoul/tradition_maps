@@ -150,6 +150,15 @@ export default function PlaceDetail({ token }) {
                   </>
                 ) : (
                   <div className="d-flex justify-content-between align-items-start">
+                    {/* Thumbnail */}
+                    {((t.images||[]).length > 0 || t.image) && (
+                      <img
+                        src={(t.images||[])[0] || t.image}
+                        alt=""
+                        style={{ width:44, height:44, objectFit:'cover', borderRadius:8, border:'1px solid #dee2e6', flexShrink:0, marginRight:12 }}
+                        onError={e => { e.target.style.display='none'; }}
+                      />
+                    )}
                     <div className="flex-grow-1 me-3">
                       <div className="d-flex align-items-center gap-2 mb-1 flex-wrap">
                         <span className={`badge badge-${t.category||'custom'}`}>

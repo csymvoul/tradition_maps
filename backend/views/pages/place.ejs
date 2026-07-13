@@ -10,6 +10,33 @@
   }
   .tradition-gallery img:hover { border-color:#1d4ed8; }
   .tradition-gallery img.active { border-color:#1d4ed8; }
+
+  /* Lightbox */
+  #lightbox {
+    display:none; position:fixed; inset:0; z-index:9999;
+    background:rgba(0,0,0,0.92); align-items:center; justify-content:center;
+  }
+  #lightbox.open { display:flex; }
+  #lb-img { max-width:90vw; max-height:85vh; object-fit:contain; border-radius:8px; }
+  .lb-btn {
+    position:absolute; background:none; border:none; color:#fff;
+    font-size:2.2rem; cursor:pointer; opacity:0.8; transition:opacity .2s; line-height:1;
+    padding:12px;
+  }
+  .lb-btn:hover { opacity:1; }
+  #lb-close { top:12px; right:16px; font-size:2rem; }
+  #lb-prev  { left:8px; top:50%; transform:translateY(-50%); }
+  #lb-next  { right:8px; top:50%; transform:translateY(-50%); }
+  #lb-counter { position:absolute; bottom:14px; left:50%; transform:translateX(-50%); color:#ccc; font-size:0.85rem; }
+
+  /* Back to top */
+  #back-to-top {
+    position:fixed; bottom:24px; right:24px; z-index:998;
+    width:40px; height:40px; border-radius:50%; background:#1a1a2e; color:#fff;
+    border:none; font-size:1rem; cursor:pointer; display:none;
+    align-items:center; justify-content:center;
+    box-shadow:0 2px 12px rgba(0,0,0,0.25); transition:opacity .2s;
+  }
 </style>
 </head>
 <body class="d-flex flex-column" style="min-height:100vh;">
@@ -62,7 +89,9 @@
               <% if (imgs.length > 0) { %>
                 <div style="position:relative;">
                   <img id="main-img-<%= tIdx %>" src="<%= imgs[0] %>" alt="<%= t.name %>"
-                    style="height:200px;object-fit:cover;width:100%;" />
+                    loading="lazy" style="height:200px;object-fit:cover;width:100%;cursor:zoom-in;"
+                    data-imgs='<%- JSON.stringify(imgs) %>'
+                    onclick="openLightbox(JSON.parse(this.dataset.imgs), 0)" />
                 </div>
               <% } else { %>
                 <div class="bg-light d-flex align-items-center justify-content-center" style="height:120px;">
@@ -77,10 +106,11 @@
 
                 <!-- Thumbnail gallery (if multiple images) -->
                 <% if (imgs.length > 1) { %>
-                  <div class="tradition-gallery mb-2">
+                  <div class="tradition-gallery mb-2" data-imgs='<%- JSON.stringify(imgs) %>'>
                     <% imgs.forEach(function(url, iIdx) { %>
-                      <img src="<%= url %>" class="<%= iIdx===0?'active':'' %>"
-                        onclick="switchImg(<%= tIdx %>, this, '<%= url %>')" />
+                      <img src="<%= url %>" loading="lazy" class="<%= iIdx===0?'active':'' %>"
+                        data-iidx="<%= iIdx %>"
+                        onclick="switchImg(<%= tIdx %>, this); openLightbox(JSON.parse(this.closest('.tradition-gallery').dataset.imgs), parseInt(this.dataset.iidx))" />
                     <% }); %>
                   </div>
                 <% } %>
@@ -129,6 +159,20 @@
   </div>
 </main>
 
+<!-- Lightbox overlay -->
+<div id="lightbox">
+  <button class="lb-btn" id="lb-close" onclick="closeLightbox()">×</button>
+  <button class="lb-btn" id="lb-prev" onclick="lbNav(-1)">&#8249;</button>
+  <img id="lb-img" src="" alt="" />
+  <button class="lb-btn" id="lb-next" onclick="lbNav(1)">&#8250;</button>
+  <div id="lb-counter"></div>
+</div>
+
+<!-- Back to top -->
+<button id="back-to-top" title="Επιστροφή στην αρχή" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <i class="bi bi-chevron-up"></i>
+</button>
+
 <%- include('../partials/footer') %>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -144,12 +188,43 @@
     radius:10, fillColor:'#1d4ed8', color:'#fff', weight:3, fillOpacity:1
   }).addTo(map).bindTooltip('<%= place.name %>', { permanent:true, direction:'top', offset:[0,-14] });
 
-  // Gallery thumbnail switcher
-  function switchImg(tIdx, thumb, url) {
-    document.getElementById('main-img-' + tIdx).src = url;
+  // Gallery thumbnail switcher (reads URL from the thumb element itself)
+  function switchImg(tIdx, thumb) {
+    document.getElementById('main-img-' + tIdx).src = thumb.src;
     thumb.closest('.tradition-gallery').querySelectorAll('img').forEach(i => i.classList.remove('active'));
     thumb.classList.add('active');
   }
+
+  // ── Lightbox ──
+  let lbImages = [], lbIndex = 0;
+  function openLightbox(images, index) {
+    lbImages = images; lbIndex = index;
+    updateLb();
+    document.getElementById('lightbox').classList.add('open');
+  }
+  function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+  function lbNav(dir) { lbIndex = (lbIndex + dir + lbImages.length) % lbImages.length; updateLb(); }
+  function updateLb() {
+    document.getElementById('lb-img').src = lbImages[lbIndex];
+    document.getElementById('lb-counter').textContent = (lbIndex+1) + ' / ' + lbImages.length;
+    document.getElementById('lb-prev').style.display = lbImages.length > 1 ? '' : 'none';
+    document.getElementById('lb-next').style.display = lbImages.length > 1 ? '' : 'none';
+  }
+  document.getElementById('lightbox').addEventListener('click', function(e) {
+    if (e.target === this) closeLightbox();
+  });
+  document.addEventListener('keydown', e => {
+    if (!document.getElementById('lightbox').classList.contains('open')) return;
+    if (e.key === 'ArrowLeft')  lbNav(-1);
+    if (e.key === 'ArrowRight') lbNav(1);
+    if (e.key === 'Escape')     closeLightbox();
+  });
+
+  // ── Back to top ──
+  window.addEventListener('scroll', function() {
+    const btn = document.getElementById('back-to-top');
+    btn.style.display = window.scrollY > 300 ? 'flex' : 'none';
+  });
 </script>
 </body>
 </html>

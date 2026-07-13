@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="el">
-<head><%- include('../partials/head') %></head>
+<head><%- include('../partials/head') %>
+<style>
+  /* Back to top */
+  #back-to-top {
+    position:fixed; bottom:24px; right:24px; z-index:998;
+    width:40px; height:40px; border-radius:50%; background:#1a1a2e; color:#fff;
+    border:none; font-size:1rem; cursor:pointer; display:none;
+    align-items:center; justify-content:center;
+    box-shadow:0 2px 12px rgba(0,0,0,0.25);
+  }
+</style>
+</head>
 <body class="d-flex flex-column" style="min-height:100vh;">
 
 <%- include('../partials/header') %>
@@ -11,10 +22,17 @@
     <span class="badge bg-dark fs-6"><%= places.length %> μέρη</span>
   </div>
 
-  <!-- Search -->
-  <div class="mb-4" style="max-width:400px;">
+  <!-- Search + Sort row -->
+  <div class="d-flex flex-wrap gap-2 align-items-center mb-4">
     <input id="info-search" type="text" class="form-control"
-      placeholder="🔍 Αναζήτηση μέρους…" />
+      placeholder="🔍 Αναζήτηση μέρους…" style="max-width:320px;" />
+    <select id="sort-select" class="form-select" style="width:auto;">
+      <option value="default">Αρχική σειρά</option>
+      <option value="alpha">Αλφαβητικά (Α→Ω)</option>
+      <option value="region">Κατά Περιοχή</option>
+      <option value="count-desc">Περισσότερες παραδόσεις</option>
+      <option value="count-asc">Λιγότερες παραδόσεις</option>
+    </select>
   </div>
 
   <% if (places.length === 0) { %>
@@ -24,12 +42,17 @@
     </div>
   <% } else { %>
     <div class="row g-4" id="places-grid">
-      <% places.forEach(function(place) { %>
-        <div class="col-sm-6 col-lg-4 place-card-wrapper" data-name="<%= (place.name + ' ' + (place.region||'')).toLowerCase() %>">
+      <% places.forEach(function(place, idx) { %>
+        <div class="col-sm-6 col-lg-4 place-card-wrapper"
+          data-name="<%= (place.name + ' ' + (place.region||'')).toLowerCase() %>"
+          data-sort-name="<%= place.name.toLowerCase() %>"
+          data-sort-region="<%= (place.region||'').toLowerCase() %>"
+          data-sort-count="<%= (place.traditions||[]).length %>"
+          data-sort-order="<%= idx %>">
           <a href="/place/<%= place.id %>" class="text-decoration-none text-dark">
             <div class="card place-card shadow-sm border-0 h-100">
               <% if (place.image) { %>
-                <img src="<%= place.image %>" alt="<%= place.name %>" class="card-img-top" />
+                <img src="<%= place.image %>" alt="<%= place.name %>" class="card-img-top" loading="lazy" />
               <% } else { %>
                 <div class="bg-light d-flex align-items-center justify-content-center" style="height:200px;">
                   <i class="bi bi-geo-alt text-muted" style="font-size:3rem;"></i>
@@ -75,10 +98,15 @@
 
 <%- include('../partials/footer') %>
 
+<!-- Back to top -->
+<button id="back-to-top" title="Επιστροφή στην αρχή" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <i class="bi bi-chevron-up"></i>
+</button>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-document.getElementById('info-search')?.addEventListener('input', function() {
-  const q = this.value.toLowerCase();
+// Search filter
+function filterCards(q) {
   const cards = document.querySelectorAll('.place-card-wrapper');
   let visible = 0;
   cards.forEach(card => {
@@ -88,6 +116,34 @@ document.getElementById('info-search')?.addEventListener('input', function() {
   });
   const noResults = document.getElementById('no-results');
   if (noResults) noResults.style.display = visible === 0 ? '' : 'none';
+}
+
+document.getElementById('info-search')?.addEventListener('input', function() {
+  filterCards(this.value.toLowerCase().trim());
+});
+
+// Sort
+document.getElementById('sort-select')?.addEventListener('change', function() {
+  const grid = document.getElementById('places-grid');
+  const cards = [...grid.querySelectorAll('.place-card-wrapper')];
+  const val = this.value;
+  cards.sort((a, b) => {
+    if (val === 'alpha')      return a.dataset.sortName.localeCompare(b.dataset.sortName, 'el');
+    if (val === 'region')     return (a.dataset.sortRegion||'').localeCompare(b.dataset.sortRegion||'', 'el');
+    if (val === 'count-desc') return parseInt(b.dataset.sortCount||0) - parseInt(a.dataset.sortCount||0);
+    if (val === 'count-asc')  return parseInt(a.dataset.sortCount||0) - parseInt(b.dataset.sortCount||0);
+    return parseInt(a.dataset.sortOrder||0) - parseInt(b.dataset.sortOrder||0);
+  });
+  cards.forEach(c => grid.appendChild(c));
+  // Re-apply search filter after sort
+  const q = document.getElementById('info-search')?.value.toLowerCase().trim() || '';
+  if (q) filterCards(q);
+});
+
+// Back to top
+window.addEventListener('scroll', function() {
+  const btn = document.getElementById('back-to-top');
+  btn.style.display = window.scrollY > 300 ? 'flex' : 'none';
 });
 </script>
 </body>

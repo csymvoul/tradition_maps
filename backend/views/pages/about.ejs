@@ -8,6 +8,16 @@
 <main class="container py-5 flex-grow-1" style="max-width:780px;">
   <h2 class="fw-bold mb-4">Σχετικά με την Εφαρμογή</h2>
 
+  <!-- Live stats -->
+  <div class="card border-0 shadow-sm p-4 mb-4">
+    <h5 class="fw-semibold mb-3"><i class="bi bi-bar-chart-fill me-2 text-warning"></i>Στατιστικά</h5>
+    <div id="stats-row" class="row g-3 text-center">
+      <div class="col-12 text-muted py-2">
+        <span class="spinner-border spinner-border-sm me-2"></span>Φόρτωση…
+      </div>
+    </div>
+  </div>
+
   <div class="card border-0 shadow-sm p-4 mb-4">
     <h5 class="fw-semibold mb-3"><i class="bi bi-mortarboard me-2 text-primary"></i>Ακαδημαϊκό Πλαίσιο</h5>
     <p class="text-muted">
@@ -81,5 +91,39 @@
 <%- include('../partials/footer') %>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(async function loadStats() {
+  const CAT_LABELS = {
+    festival:'Φεστιβάλ', museum:'Μουσείο', church:'Εκκλησία',
+    music:'Μουσική', dance:'Χορός', food:'Φαγητό', custom:'Άλλο'
+  };
+  try {
+    const places = await fetch('/api/places').then(r => r.json());
+    const traditions = places.flatMap(p => p.traditions || []);
+    const catCounts = {};
+    traditions.forEach(t => { const c = t.category||'custom'; catCounts[c]=(catCounts[c]||0)+1; });
+    const catRows = Object.entries(catCounts)
+      .sort((a,b) => b[1]-a[1])
+      .map(([cat, n]) => `
+        <div class="col-6 col-sm-4 col-md-3">
+          <span class="badge badge-${cat} mb-1">${CAT_LABELS[cat]||cat}</span>
+          <div class="fw-bold fs-5">${n}</div>
+          <div class="text-muted small">παραδόσεις</div>
+        </div>`).join('');
+    document.getElementById('stats-row').innerHTML = `
+      <div class="col-6 col-md-3">
+        <div class="display-6 fw-bold text-dark">${places.length}</div>
+        <div class="text-muted small">Μέρη</div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="display-6 fw-bold text-dark">${traditions.length}</div>
+        <div class="text-muted small">Παραδόσεις</div>
+      </div>
+      ${catRows}`;
+  } catch(e) {
+    document.getElementById('stats-row').innerHTML = '<div class="col text-muted small">Δεν ήταν δυνατή η φόρτωση στατιστικών.</div>';
+  }
+})();
+</script>
 </body>
 </html>
