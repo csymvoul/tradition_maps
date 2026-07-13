@@ -6,14 +6,11 @@
 <%- include('../partials/header') %>
 
 <div id="map-wrapper">
-  <!-- Filter + Search overlay (right side) -->
+  <!-- Filter + Search overlay (top-center, horizontal) -->
   <div id="filter-panel">
-    <!-- Search -->
-    <div class="mb-2">
-      <input id="map-search" type="text" class="form-control form-control-sm"
-        placeholder="🔍 Αναζήτηση μέρους…" />
-    </div>
-    <div class="fw-semibold mb-2" style="font-size:0.78rem;color:#555;">ΚΑΤΗΓΟΡΙΑ</div>
+    <input id="map-search" type="text" class="form-control form-control-sm"
+      placeholder="🔍 Αναζήτηση…" style="min-width:130px;border-radius:20px;" />
+    <div class="filter-sep"></div>
     <div class="form-check">
       <input class="form-check-input" type="checkbox" value="festival" id="f-festival" checked>
       <label class="form-check-label" for="f-festival"><span class="badge badge-festival">Φεστιβάλ</span></label>
@@ -38,12 +35,12 @@
       <input class="form-check-input" type="checkbox" value="food" id="f-food" checked>
       <label class="form-check-label" for="f-food"><span class="badge badge-food">Φαγητό</span></label>
     </div>
-    <div class="form-check mb-2">
+    <div class="form-check">
       <input class="form-check-input" type="checkbox" value="custom" id="f-custom" checked>
       <label class="form-check-label" for="f-custom"><span class="badge badge-custom">Άλλο</span></label>
     </div>
-    <!-- Locate me -->
-    <button id="locate-btn" class="btn btn-outline-dark btn-sm w-100 mt-1">
+    <div class="filter-sep"></div>
+    <button id="locate-btn" class="btn btn-outline-dark btn-sm" style="border-radius:20px;white-space:nowrap;">
       <i class="bi bi-crosshair me-1"></i>Κοντά μου
     </button>
   </div>
