@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="el">
+<head><%- include('../partials/head') %></head>
+<body class="d-flex flex-column" style="min-height:100vh;">
+
+<%- include('../partials/header') %>
+
+<!-- Hero -->
+<section style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%);color:#fff;padding:80px 0 60px;">
+  <div class="container text-center">
+    <i class="bi bi-music-note-beamed text-warning" style="font-size:3.5rem;"></i>
+    <h1 class="fw-bold mt-3 mb-3" style="font-size:2.8rem;">Παράδοση στην Ελλάδα</h1>
+    <p class="lead text-white-50 mx-auto mb-5" style="max-width:620px;">
+      Ένας διαδραστικός χάρτης που αναδεικνύει τη μουσική και πολιτισμική παράδοση
+      κάθε γωνιάς της Ελλάδας — από την Κρήτη ως τη Μακεδονία.
+    </p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+      <a href="/map" class="btn btn-warning btn-lg fw-semibold px-4">
+        <i class="bi bi-map me-2"></i>Εξερευνήστε τον Χάρτη
+      </a>
+      <a href="/info" class="btn btn-outline-light btn-lg px-4">
+        <i class="bi bi-grid me-2"></i>Δείτε τα Μέρη
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- What is this -->
+<section class="py-5 bg-white">
+  <div class="container" style="max-width:860px;">
+    <div class="row align-items-center g-5">
+      <div class="col-md-6">
+        <h2 class="fw-bold mb-3">Τι είναι αυτή η εφαρμογή;</h2>
+        <p class="text-muted">
+          Η εφαρμογή <strong>Παράδοση στην Ελλάδα</strong> αναπτύχθηκε στο πλαίσιο μεταπτυχιακής διατριβής
+          με στόχο την ψηφιακή χαρτογράφηση της μουσικής και πολιτισμικής κληρονομιάς της χώρας μας.
+        </p>
+        <p class="text-muted">
+          Κάθε περιοχή της Ελλάδας κρύβει μοναδικές παραδόσεις — χορούς, μουσικά όργανα, φεστιβάλ
+          και έθιμα που διαμορφώθηκαν μέσα από αιώνες ιστορίας. Εδώ μπορείτε να τις εξερευνήσετε
+          διαδραστικά, μέσα από έναν ζωντανό χάρτη.
+        </p>
+        <a href="/about" class="btn btn-outline-dark btn-sm mt-2">
+          <i class="bi bi-info-circle me-1"></i>Περισσότερα για την εφαρμογή
+        </a>
+      </div>
+      <div class="col-md-6">
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="card border-0 bg-light p-3 text-center h-100">
+              <i class="bi bi-geo-alt-fill text-danger mb-2" style="font-size:2rem;"></i>
+              <div class="fw-bold">Διαδραστικός Χάρτης</div>
+              <small class="text-muted">Εξερευνήστε κάθε περιοχή με ένα κλικ</small>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="card border-0 bg-light p-3 text-center h-100">
+              <i class="bi bi-collection-fill text-primary mb-2" style="font-size:2rem;"></i>
+              <div class="fw-bold">Πολλές Παραδόσεις</div>
+              <small class="text-muted">Κάθε μέρος με τις δικές του παραδόσεις</small>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="card border-0 bg-light p-3 text-center h-100">
+              <i class="bi bi-funnel-fill text-warning mb-2" style="font-size:2rem;"></i>
+              <div class="fw-bold">Φίλτρα Κατηγοριών</div>
+              <small class="text-muted">Φεστιβάλ, μουσική, χορός κι άλλα</small>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="card border-0 bg-light p-3 text-center h-100">
+              <i class="bi bi-youtube text-danger mb-2" style="font-size:2rem;"></i>
+              <div class="fw-bold">Πολυμεσικό Υλικό</div>
+              <small class="text-muted">Βίντεο και σύνδεσμοι για κάθε παράδοση</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Categories -->
+<section class="py-5" style="background:#f8f9fa;">
+  <div class="container text-center" style="max-width:760px;">
+    <h3 class="fw-bold mb-2">Κατηγορίες Παραδόσεων</h3>
+    <p class="text-muted mb-4">Η κάθε παράδοση ανήκει σε μία από τις παρακάτω κατηγορίες</p>
+    <div class="d-flex flex-wrap justify-content-center gap-2">
+      <span class="badge badge-festival fs-6 px-3 py-2">Φεστιβάλ</span>
+      <span class="badge badge-music fs-6 px-3 py-2">Μουσική</span>
+      <span class="badge badge-dance fs-6 px-3 py-2">Χορός</span>
+      <span class="badge badge-museum fs-6 px-3 py-2">Μουσείο</span>
+      <span class="badge badge-church fs-6 px-3 py-2">Εκκλησία</span>
+      <span class="badge badge-food fs-6 px-3 py-2">Φαγητό</span>
+      <span class="badge badge-custom fs-6 px-3 py-2">Άλλο</span>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

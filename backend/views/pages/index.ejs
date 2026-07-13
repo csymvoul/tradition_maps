@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="el">
+<head><%- include('../partials/head') %></head>
+<body class="d-flex flex-column" style="min-height:100vh;">
+
+<%- include('../partials/header') %>
+
+<div id="map-wrapper">
+  <!-- Category filter overlay -->
+  <div id="filter-panel">
+    <div class="fw-semibold mb-2" style="font-size:0.8rem;color:#555;">ΦΙΛΤΡΟ ΚΑΤΗΓΟΡΙΑΣ</div>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" value="festival" id="f-festival" checked>
+      <label class="form-check-label" for="f-festival">
+        <span class="badge badge-festival">Φεστιβάλ</span>
+      </label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" value="museum" id="f-museum" checked>
+      <label class="form-check-label" for="f-museum">
+        <span class="badge badge-museum">Μουσείο</span>
+      </label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" value="church" id="f-church" checked>
+      <label class="form-check-label" for="f-church">
+        <span class="badge badge-church">Εκκλησία</span>
+      </label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" value="music" id="f-music" checked>
+      <label class="form-check-label" for="f-music">
+        <span class="badge badge-music">Μουσική</span>
+      </label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" value="dance" id="f-dance" checked>
+      <label class="form-check-label" for="f-dance">
+        <span class="badge badge-dance">Χορός</span>
+      </label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" value="food" id="f-food" checked>
+      <label class="form-check-label" for="f-food">
+        <span class="badge badge-food">Φαγητό</span>
+      </label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" value="custom" id="f-custom" checked>
+      <label class="form-check-label" for="f-custom">
+        <span class="badge badge-custom">Άλλο</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Map -->
+  <div id="map"></div>
+
+  <!-- Side panel -->
+  <div id="side-panel">
+    <div class="panel-header d-flex justify-content-between align-items-start">
+      <div>
+        <h5 id="sp-name" class="mb-1 fw-bold"></h5>
+        <small id="sp-region" class="text-muted"></small>
+      </div>
+      <button class="btn btn-sm btn-light ms-2 flex-shrink-0" id="sp-close">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    <div class="panel-body">
+      <p id="sp-desc" class="text-muted mb-3" style="font-size:0.9rem;"></p>
+      <h6 class="fw-semibold mb-2">Παραδόσεις</h6>
+      <div id="sp-traditions"></div>
+      <a id="sp-link" href="#" class="btn btn-dark btn-sm mt-3 w-100">
+        <i class="bi bi-arrow-right-circle me-1"></i>Δείτε Περισσότερα
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+<script>
+const CATEGORY_LABELS = {
+  festival: 'Φεστιβάλ', museum: 'Μουσείο', church: 'Εκκλησία',
+  music: 'Μουσική', dance: 'Χορός', food: 'Φαγητό', custom: 'Άλλο'
+};
+
+// Map init — CartoDB Positron tiles
+const map = L.map('map', { zoomControl: true }).setView([38.5, 23.0], 6);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  subdomains: 'abcd',
+  maxZoom: 19
+}).addTo(map);
+
+const clusterGroup = L.markerClusterGroup({ maxClusterRadius: 50 });
+map.addLayer(clusterGroup);
+
+let allPlaces = [];
+let activeFilters = new Set(['festival','museum','church','music','dance','food','custom']);
+let markerMap = {};   // placeId → { marker, place }
+
+// Side panel refs
+const panel = document.getElementById('side-panel');
+const spName = document.getElementById('sp-name');
+const spRegion = document.getElementById('sp-region');
+const spDesc = document.getElementById('sp-desc');
+const spTraditions = document.getElementById('sp-traditions');
+const spLink = document.getElementById('sp-link');
+
+document.getElementById('sp-close').addEventListener('click', () => panel.classList.remove('open'));
+
+function openPanel(place) {
+  spName.textContent = place.name;
+  spRegion.textContent = place.region || '';
+  spDesc.textContent = place.description || '';
+  spLink.href = '/place/' + place.id;
+  spTraditions.innerHTML = '';
+
+  (place.traditions || []).forEach(t => {
+    const catClass = 'badge-' + (t.category || 'custom');
+    const catLabel = CATEGORY_LABELS[t.category] || t.category;
+    spTraditions.innerHTML += `
+      <div class="tradition-card">
+        <span class="badge ${catClass} mb-1">${catLabel}</span>
+        <div class="fw-semibold">${t.name}</div>
+        <small class="text-muted">${t.description ? t.description.substring(0, 120) + '...' : ''}</small>
+      </div>`;
+  });
+  panel.classList.add('open');
+}
+
+function placeCategories(place) {
+  return new Set((place.traditions || []).map(t => t.category || 'custom'));
+}
+
+function makeMarker(place) {
+  const count = (place.traditions || []).length;
+  const icon = L.divIcon({
+    className: '',
+    html: `<div class="place-marker">${count}</div>`,
+    iconSize: [36, 36],
+    iconAnchor: [18, 18]
+  });
+  const marker = L.marker([place.latitude, place.longitude], { icon });
+  marker.bindTooltip(place.name, { permanent: false, direction: 'top', offset: [0, -20] });
+  marker.on('click', () => openPanel(place));
+  return marker;
+}
+
+function redrawMarkers() {
+  clusterGroup.clearLayers();
+  allPlaces.forEach(place => {
+    const cats = placeCategories(place);
+    const visible = [...cats].some(c => activeFilters.has(c));
+    if (visible) clusterGroup.addLayer(markerMap[place.id]);
+  });
+}
+
+async function loadPlaces() {
+  try {
+    const res = await fetch('/api/places');
+    allPlaces = await res.json();
+    allPlaces.forEach(place => {
+      markerMap[place.id] = makeMarker(place);
+    });
+    redrawMarkers();
+  } catch (e) {
+    console.error('Failed to load places', e);
+  }
+}
+
+// Filter checkboxes
+document.querySelectorAll('#filter-panel input[type=checkbox]').forEach(cb => {
+  cb.addEventListener('change', () => {
+    if (cb.checked) activeFilters.add(cb.value);
+    else activeFilters.delete(cb.value);
+    redrawMarkers();
+  });
+});
+
+loadPlaces();
+</script>
+</body>
+</html>
