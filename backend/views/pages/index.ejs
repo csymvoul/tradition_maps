@@ -47,6 +47,33 @@
 
   <div id="map"></div>
 
+  <!-- "No results" hint -->
+  <div id="map-no-results" style="display:none;">
+    <i class="bi bi-search me-1"></i>Δεν βρέθηκαν αποτελέσματα για αυτή την αναζήτηση
+  </div>
+
+  <!-- Legend -->
+  <div id="map-legend">
+    <div class="fw-semibold mb-2"><i class="bi bi-info-circle me-1"></i>Υπόμνημα</div>
+    <div class="legend-row">
+      <span class="legend-symbol" style="background:#1d4ed8;">3</span>
+      <span>Μέρος &mdash; ο αριθμός δείχνει πόσες παραδόσεις έχει</span>
+    </div>
+    <div class="legend-row">
+      <span class="legend-symbol" style="background:#10b981;">5</span>
+      <span>Ομάδα μερών &mdash; ο αριθμός δείχνει πόσα μέρη περιέχει, το χρώμα την επικρατέστερη κατηγορία</span>
+    </div>
+    <div class="legend-cats">
+      <span><span class="legend-dot" style="background:#f59e0b;"></span>Φεστιβάλ</span>
+      <span><span class="legend-dot" style="background:#3b82f6;"></span>Μουσείο</span>
+      <span><span class="legend-dot" style="background:#8b5cf6;"></span>Εκκλησία</span>
+      <span><span class="legend-dot" style="background:#10b981;"></span>Μουσική</span>
+      <span><span class="legend-dot" style="background:#ef4444;"></span>Χορός</span>
+      <span><span class="legend-dot" style="background:#f97316;"></span>Φαγητό</span>
+      <span><span class="legend-dot" style="background:#6b7280;"></span>Άλλο</span>
+    </div>
+  </div>
+
   <!-- Side panel -->
   <div id="side-panel">
     <div class="panel-header d-flex justify-content-between align-items-start">
@@ -174,6 +201,9 @@ function redrawMarkers() {
     const show = [...cats].some(c => activeFilters.has(c)) && matchesSearch(place);
     if (show) { clusterGroup.addLayer(markerMap[place.id]); visible.push(markerMap[place.id]); }
   });
+  // "No results" hint (only when data exists but filters/search hide everything)
+  document.getElementById('map-no-results').style.display =
+    (allPlaces.length > 0 && visible.length === 0) ? '' : 'none';
   // Fit bounds to visible markers (only after initial load, not on first draw)
   if (mapInitialized && visible.length > 0) {
     map.fitBounds(L.featureGroup(visible).getBounds().pad(0.15), { maxZoom: 12, animate: true });
