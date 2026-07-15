@@ -4,16 +4,36 @@
 <style>
   #map-belt { height: 240px; width: 100%; }
 
-  /* Contain Quill rich-text content (images can be arbitrary size) */
-  .detail-content img { max-width: 100%; height: auto; border-radius: 6px; }
-  .detail-content iframe { max-width: 100%; }
-  .tradition-gallery { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
-  .tradition-gallery img {
-    height:90px; width:90px; object-fit:cover; border-radius:8px;
-    cursor:pointer; border:2px solid transparent; transition:border-color .2s;
+  /* Tradition card — compact, clickable */
+  .trad-card {
+    border-radius: 12px; overflow: hidden;
+    transition: transform 0.18s, box-shadow 0.18s;
+    cursor: pointer;
   }
-  .tradition-gallery img:hover { border-color:#1d4ed8; }
-  .tradition-gallery img.active { border-color:#1d4ed8; }
+  .trad-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.13) !important;
+  }
+  .trad-card .card-img-top {
+    height: 180px; object-fit: cover; width: 100%;
+  }
+
+  /* Modal image gallery */
+  #tm-gallery {
+    display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px;
+    scroll-snap-type: x mandatory;
+  }
+  #tm-gallery::-webkit-scrollbar { height: 4px; }
+  #tm-gallery::-webkit-scrollbar-thumb { background: #dee2e6; border-radius: 4px; }
+  #tm-gallery img {
+    height: 220px; width: auto; max-width: 80vw;
+    object-fit: cover; border-radius: 10px;
+    cursor: zoom-in; flex-shrink: 0;
+    scroll-snap-align: start;
+    transition: opacity .2s;
+  }
+  #tm-gallery img:hover { opacity: .88; }
+  #tm-gallery.single img { height: 280px; max-width: 100%; width: 100%; }
 
   /* Lightbox */
   #lightbox {
@@ -24,14 +44,14 @@
   #lb-img { max-width:90vw; max-height:85vh; object-fit:contain; border-radius:8px; }
   .lb-btn {
     position:absolute; background:none; border:none; color:#fff;
-    font-size:2.2rem; cursor:pointer; opacity:0.8; transition:opacity .2s; line-height:1;
-    padding:12px;
+    font-size:2.2rem; cursor:pointer; opacity:.8; transition:opacity .2s;
+    line-height:1; padding:12px;
   }
   .lb-btn:hover { opacity:1; }
   #lb-close { top:12px; right:16px; font-size:2rem; }
-  #lb-prev  { left:8px; top:50%; transform:translateY(-50%); }
+  #lb-prev  { left:8px;  top:50%; transform:translateY(-50%); }
   #lb-next  { right:8px; top:50%; transform:translateY(-50%); }
-  #lb-counter { position:absolute; bottom:14px; left:50%; transform:translateX(-50%); color:#ccc; font-size:0.85rem; }
+  #lb-counter { position:absolute; bottom:14px; left:50%; transform:translateX(-50%); color:#ccc; font-size:.85rem; }
 
   /* Back to top */
   #back-to-top {
@@ -39,8 +59,20 @@
     width:40px; height:40px; border-radius:50%; background:#1a1a2e; color:#fff;
     border:none; font-size:1rem; cursor:pointer; display:none;
     align-items:center; justify-content:center;
-    box-shadow:0 2px 12px rgba(0,0,0,0.25); transition:opacity .2s;
+    box-shadow:0 2px 12px rgba(0,0,0,0.25);
   }
+
+  /* Modal header — pin close button top-right regardless of title length */
+  #tradition-modal .modal-header { position: relative; padding-right: 3rem; }
+  #tradition-modal .btn-close {
+    position: absolute; top: 1rem; right: 1rem;
+    margin: 0;
+  }
+
+  /* Detailed description content in modal */
+  #tm-detail h2, #tm-detail h3 { font-size:1.1rem; font-weight:600; margin-top:1rem; }
+  #tm-detail ul, #tm-detail ol { padding-left:1.4rem; }
+  #tm-detail p { margin-bottom:.6rem; }
 </style>
 </head>
 <body class="d-flex flex-column" style="min-height:100vh;">
@@ -72,7 +104,7 @@
   <!-- Map belt -->
   <div id="map-belt"></div>
 
-  <!-- Traditions -->
+  <!-- Traditions grid -->
   <div class="container py-5">
     <h3 class="fw-bold mb-4">Παραδόσεις</h3>
 
@@ -86,67 +118,39 @@
           const cat = t.category || 'custom';
           const imgs = (t.images && t.images.length > 0) ? t.images : (t.image ? [t.image] : []);
         %>
-          <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm border-0" style="border-radius:12px;overflow:hidden;">
+          <div class="col-sm-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0 trad-card" onclick="openTraditionModal(<%= tIdx %>)">
 
-              <!-- Image display -->
               <% if (imgs.length > 0) { %>
-                <div style="position:relative;">
-                  <img id="main-img-<%= tIdx %>" src="<%= imgs[0] %>" alt="<%= t.name %>"
-                    loading="lazy" style="height:200px;object-fit:cover;width:100%;cursor:zoom-in;"
-                    data-imgs='<%- JSON.stringify(imgs) %>'
-                    onclick="openLightbox(JSON.parse(this.dataset.imgs), 0)" />
-                </div>
+                <img src="<%= imgs[0] %>" alt="<%= t.name %>" class="card-img-top" loading="lazy" />
               <% } else { %>
-                <div class="bg-light d-flex align-items-center justify-content-center" style="height:120px;">
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height:180px;">
                   <i class="bi bi-music-note-beamed text-muted" style="font-size:2.5rem;"></i>
                 </div>
               <% } %>
 
               <div class="card-body d-flex flex-column">
                 <span class="badge badge-<%= cat %> mb-2 align-self-start"><%= catLabels[cat]||cat %></span>
-                <h5 class="card-title fw-bold"><%= t.name %></h5>
-                <p class="card-text text-muted flex-grow-1" style="font-size:0.9rem;"><%= t.description||'' %></p>
-
-                <!-- Thumbnail gallery (if multiple images) -->
-                <% if (imgs.length > 1) { %>
-                  <div class="tradition-gallery mb-2" data-imgs='<%- JSON.stringify(imgs) %>'>
-                    <% imgs.forEach(function(url, iIdx) { %>
-                      <img src="<%= url %>" loading="lazy" class="<%= iIdx===0?'active':'' %>"
-                        data-iidx="<%= iIdx %>"
-                        onclick="switchImg(<%= tIdx %>, this); openLightbox(JSON.parse(this.closest('.tradition-gallery').dataset.imgs), parseInt(this.dataset.iidx))" />
-                    <% }); %>
+                <h5 class="card-title fw-bold mb-1"><%= t.name %></h5>
+                <p class="card-text text-muted flex-grow-1" style="font-size:.9rem;">
+                  <%= t.description ? t.description.substring(0,120) + (t.description.length > 120 ? '…' : '') : '' %>
+                </p>
+                <div class="mt-2 pt-2 border-top d-flex align-items-center justify-content-between">
+                  <div class="d-flex gap-1 flex-wrap">
+                    <% if (t.youtube) { %>
+                      <a href="<%= t.youtube %>" target="_blank" onclick="event.stopPropagation()"
+                        class="btn btn-danger btn-sm py-0 px-2"><i class="bi bi-youtube"></i></a>
+                    <% } %>
+                    <% if (t.google) { %>
+                      <a href="<%= t.google %>" target="_blank" onclick="event.stopPropagation()"
+                        class="btn btn-primary btn-sm py-0 px-2"><i class="bi bi-search"></i></a>
+                    <% } %>
+                    <% if (t.visitgreece) { %>
+                      <a href="<%= t.visitgreece %>" target="_blank" onclick="event.stopPropagation()"
+                        class="btn btn-success btn-sm py-0 px-2"><i class="bi bi-globe"></i></a>
+                    <% } %>
                   </div>
-                <% } %>
-
-                <% if (t.detailedDescription) { %>
-                  <button class="btn btn-outline-secondary btn-sm mb-3 mt-1"
-                    type="button" data-bs-toggle="collapse" data-bs-target="#detail-<%= t.id %>">
-                    <i class="bi bi-chevron-down me-1"></i>Αναλυτική Περιγραφή
-                  </button>
-                  <div class="collapse mb-3" id="detail-<%= t.id %>">
-                    <div class="card card-body border-0 bg-light detail-content" style="font-size:0.85rem;">
-                      <%- t.detailedDescription %>
-                    </div>
-                  </div>
-                <% } %>
-
-                <div class="d-flex gap-2 flex-wrap mt-auto">
-                  <% if (t.youtube) { %>
-                    <a href="<%= t.youtube %>" target="_blank" rel="noopener" class="btn btn-danger btn-sm">
-                      <i class="bi bi-youtube me-1"></i>YouTube
-                    </a>
-                  <% } %>
-                  <% if (t.google) { %>
-                    <a href="<%= t.google %>" target="_blank" rel="noopener" class="btn btn-primary btn-sm">
-                      <i class="bi bi-search me-1"></i>Αναζήτηση
-                    </a>
-                  <% } %>
-                  <% if (t.visitgreece) { %>
-                    <a href="<%= t.visitgreece %>" target="_blank" rel="noopener" class="btn btn-success btn-sm">
-                      <i class="bi bi-globe me-1"></i>Visit Greece
-                    </a>
-                  <% } %>
+                  <span class="text-muted small"><i class="bi bi-arrows-fullscreen me-1"></i>Λεπτομέρειες</span>
                 </div>
               </div>
             </div>
@@ -163,17 +167,49 @@
   </div>
 </main>
 
+<!-- ── Tradition detail modal ──────────────────────────────────────────────── -->
+<div class="modal fade" id="tradition-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <div class="modal-header align-items-start border-0 pb-0">
+        <div>
+          <span id="tm-badge" class="badge mb-2"></span>
+          <h4 id="tm-name" class="fw-bold mb-0"></h4>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body pt-3">
+        <!-- Image gallery — horizontal scroll, each image opens lightbox -->
+        <div id="tm-gallery" class="mb-4"></div>
+
+        <!-- Short description -->
+        <p id="tm-desc" class="text-muted mb-3" style="font-size:.95rem;"></p>
+
+        <!-- Detailed description (rendered HTML from Quill) -->
+        <div id="tm-detail" class="mb-4"></div>
+
+        <!-- External links -->
+        <div id="tm-links" class="d-flex gap-2 flex-wrap pt-3 border-top"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <!-- Lightbox overlay -->
 <div id="lightbox">
   <button class="lb-btn" id="lb-close" onclick="closeLightbox()">×</button>
-  <button class="lb-btn" id="lb-prev" onclick="lbNav(-1)">&#8249;</button>
+  <button class="lb-btn" id="lb-prev"  onclick="lbNav(-1)">&#8249;</button>
   <img id="lb-img" src="" alt="" />
-  <button class="lb-btn" id="lb-next" onclick="lbNav(1)">&#8250;</button>
+  <button class="lb-btn" id="lb-next"  onclick="lbNav(1)">&#8250;</button>
   <div id="lb-counter"></div>
 </div>
 
 <!-- Back to top -->
-<button id="back-to-top" title="Επιστροφή στην αρχή" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+<button id="back-to-top" title="Επιστροφή στην αρχή"
+  onclick="window.scrollTo({top:0,behavior:'smooth'})">
   <i class="bi bi-chevron-up"></i>
 </button>
 
@@ -182,53 +218,131 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  // Map belt
-  const map = L.map('map-belt', {
-    zoomControl:false, attributionControl:false,
-    dragging:false, scrollWheelZoom:false, doubleClickZoom:false
-  }).setView([<%= place.latitude %>, <%= place.longitude %>], 9);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { subdomains:'abcd' }).addTo(map);
-  L.circleMarker([<%= place.latitude %>, <%= place.longitude %>], {
-    radius:10, fillColor:'#1d4ed8', color:'#fff', weight:3, fillOpacity:1
-  }).addTo(map).bindTooltip('<%= place.name %>', { permanent:true, direction:'top', offset:[0,-14] });
+// ── Map belt ────────────────────────────────────────────────────────────────
+const map = L.map('map-belt', {
+  zoomControl:false, attributionControl:false,
+  dragging:false, scrollWheelZoom:false, doubleClickZoom:false
+}).setView([<%= place.latitude %>, <%= place.longitude %>], 9);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { subdomains:'abcd' }).addTo(map);
+L.circleMarker([<%= place.latitude %>, <%= place.longitude %>], {
+  radius:10, fillColor:'#1d4ed8', color:'#fff', weight:3, fillOpacity:1
+}).addTo(map).bindTooltip('<%= place.name %>', { permanent:true, direction:'top', offset:[0,-14] });
 
-  // Gallery thumbnail switcher (reads URL from the thumb element itself)
-  function switchImg(tIdx, thumb) {
-    document.getElementById('main-img-' + tIdx).src = thumb.src;
-    thumb.closest('.tradition-gallery').querySelectorAll('img').forEach(i => i.classList.remove('active'));
-    thumb.classList.add('active');
+// ── All traditions data (embedded server-side for modal) ────────────────────
+const TRADITIONS = <%- JSON.stringify(place.traditions.map(function(t) {
+  return {
+    name: t.name,
+    description: t.description || '',
+    detailedDescription: t.detailedDescription || '',
+    category: t.category || 'custom',
+    images: (t.images && t.images.length > 0) ? t.images : (t.image ? [t.image] : []),
+    youtube: t.youtube || '',
+    google: t.google || '',
+    visitgreece: t.visitgreece || ''
+  };
+})) %>;
+
+const CAT_LABELS = {
+  festival:'Φεστιβάλ', museum:'Μουσείο', church:'Εκκλησία',
+  music:'Μουσική', dance:'Χορός', food:'Φαγητό', custom:'Άλλο'
+};
+
+// ── Tradition detail modal ──────────────────────────────────────────────────
+const tradModal = new bootstrap.Modal(document.getElementById('tradition-modal'));
+
+function openTraditionModal(idx) {
+  const t = TRADITIONS[idx];
+  if (!t) return;
+
+  // Badge + name
+  const badge = document.getElementById('tm-badge');
+  badge.className = `badge badge-${t.category} mb-2`;
+  badge.textContent = CAT_LABELS[t.category] || t.category;
+  document.getElementById('tm-name').textContent = t.name;
+
+  // Image gallery
+  const gallery = document.getElementById('tm-gallery');
+  gallery.innerHTML = '';
+  if (t.images.length > 0) {
+    gallery.className = t.images.length === 1 ? 'mb-4 single' : 'mb-4';
+    t.images.forEach(function(url, i) {
+      const img = document.createElement('img');
+      img.src = url;
+      img.loading = 'lazy';
+      img.alt = t.name;
+      img.onerror = function() { this.style.display = 'none'; };
+      img.onclick = function() { closeTradModal(); openLightbox(t.images, i); };
+      gallery.appendChild(img);
+    });
+    gallery.style.display = '';
+  } else {
+    gallery.style.display = 'none';
   }
 
-  // ── Lightbox ──
-  let lbImages = [], lbIndex = 0;
-  function openLightbox(images, index) {
-    lbImages = images; lbIndex = index;
-    updateLb();
-    document.getElementById('lightbox').classList.add('open');
+  // Descriptions
+  document.getElementById('tm-desc').textContent = t.description;
+  const detail = document.getElementById('tm-detail');
+  if (t.detailedDescription) {
+    detail.innerHTML = t.detailedDescription;
+    detail.style.display = '';
+  } else {
+    detail.innerHTML = '';
+    detail.style.display = 'none';
   }
-  function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
-  function lbNav(dir) { lbIndex = (lbIndex + dir + lbImages.length) % lbImages.length; updateLb(); }
-  function updateLb() {
-    document.getElementById('lb-img').src = lbImages[lbIndex];
-    document.getElementById('lb-counter').textContent = (lbIndex+1) + ' / ' + lbImages.length;
-    document.getElementById('lb-prev').style.display = lbImages.length > 1 ? '' : 'none';
-    document.getElementById('lb-next').style.display = lbImages.length > 1 ? '' : 'none';
+
+  // Links
+  const links = document.getElementById('tm-links');
+  links.innerHTML = '';
+  if (t.youtube) {
+    links.innerHTML += `<a href="${t.youtube}" target="_blank" rel="noreferrer" class="btn btn-danger"><i class="bi bi-youtube me-1"></i>YouTube</a>`;
   }
-  document.getElementById('lightbox').addEventListener('click', function(e) {
-    if (e.target === this) closeLightbox();
-  });
-  document.addEventListener('keydown', e => {
-    if (!document.getElementById('lightbox').classList.contains('open')) return;
+  if (t.google) {
+    links.innerHTML += `<a href="${t.google}" target="_blank" rel="noreferrer" class="btn btn-primary"><i class="bi bi-search me-1"></i>Google</a>`;
+  }
+  if (t.visitgreece) {
+    links.innerHTML += `<a href="${t.visitgreece}" target="_blank" rel="noreferrer" class="btn btn-success"><i class="bi bi-globe me-1"></i>Visit Greece</a>`;
+  }
+  if (!t.youtube && !t.google && !t.visitgreece) {
+    document.querySelector('.modal-body .border-top')?.classList.remove('border-top', 'pt-3');
+  }
+
+  tradModal.show();
+}
+
+function closeTradModal() { tradModal.hide(); }
+
+// ── Lightbox ────────────────────────────────────────────────────────────────
+let lbImages = [], lbIndex = 0;
+
+function openLightbox(images, index) {
+  lbImages = images; lbIndex = index;
+  updateLb();
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+function lbNav(dir) { lbIndex = (lbIndex + dir + lbImages.length) % lbImages.length; updateLb(); }
+function updateLb() {
+  document.getElementById('lb-img').src = lbImages[lbIndex];
+  document.getElementById('lb-counter').textContent = (lbIndex + 1) + ' / ' + lbImages.length;
+  document.getElementById('lb-prev').style.display = lbImages.length > 1 ? '' : 'none';
+  document.getElementById('lb-next').style.display = lbImages.length > 1 ? '' : 'none';
+}
+document.getElementById('lightbox').addEventListener('click', function(e) {
+  if (e.target === this) closeLightbox();
+});
+document.addEventListener('keydown', function(e) {
+  if (document.getElementById('lightbox').classList.contains('open')) {
     if (e.key === 'ArrowLeft')  lbNav(-1);
     if (e.key === 'ArrowRight') lbNav(1);
     if (e.key === 'Escape')     closeLightbox();
-  });
+  }
+});
 
-  // ── Back to top ──
-  window.addEventListener('scroll', function() {
-    const btn = document.getElementById('back-to-top');
-    btn.style.display = window.scrollY > 300 ? 'flex' : 'none';
-  });
+// ── Back to top ─────────────────────────────────────────────────────────────
+window.addEventListener('scroll', function() {
+  const btn = document.getElementById('back-to-top');
+  btn.style.display = window.scrollY > 300 ? 'flex' : 'none';
+});
 </script>
 </body>
 </html>

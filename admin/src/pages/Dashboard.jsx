@@ -91,7 +91,7 @@ export default function Dashboard({ token }) {
           </thead>
           <tbody>
             {places.map(p => (
-              <tr key={p._id}>
+              <tr key={p.id}>
                 <td><Link to={`/places/${p.id}`} className="text-decoration-none fw-semibold">{p.name}</Link></td>
                 <td className="text-muted">{p.region || '—'}</td>
                 <td><span className="badge bg-secondary">{(p.traditions || []).length}</span></td>
